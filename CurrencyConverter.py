@@ -4,13 +4,17 @@ By: Varun Rallabandi
 '''
 
 
+from dotenv import load_dotenv
 
+load_dotenv()
 import requests
+import os
 
 
 class CurrencyConverter:
-    def __init__(self, url):
-        self.data = requests.get(url).json()
+    def __init__(self, api_key):
+        self.url = f"https://openexchangerates.org/api/latest.json?app_id={api_key}"
+        self.data = requests.get(self.url).json()
         self.currencies = self.data['rates']
 
     def convert(self, from_currency, to_currency, amount):
@@ -22,7 +26,11 @@ class CurrencyConverter:
         return amount
 
 
-converter = CurrencyConverter("https://openexchangerates.org/api/latest.json?app_id=d2b04fd5c1a84091886e5d314807cf1e")
+API_KEY = os.environ.get("CURRENCY_CONVERTER_API_KEY")
+if not API_KEY:
+    raise ValueError("The API key is missing. Please set the environment variable CURRENCY_CONVERTER_API_KEY.")
+
+converter = CurrencyConverter(API_KEY)
 
 amount = float(input("Enter amount: "))
 from_currency = input("Enter from currency code: ")
@@ -30,3 +38,4 @@ to_currency = input("Enter to currency code: ")
 
 print("%.2f %s is equal to %.2f %s" % (
 amount, from_currency, converter.convert(from_currency, to_currency, amount), to_currency))
+
